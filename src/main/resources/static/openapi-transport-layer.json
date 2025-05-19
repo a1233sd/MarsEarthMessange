@@ -1,0 +1,186 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Space Communication - Transport Layer API",
+    "description": "Transport layer API for message segmentation, transmission via Kafka, and reconstruction.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Vladimir Vasilyev"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Transport Layer Server"
+    },
+    {
+      "url": "http://localhost:8005",
+      "description": "Earth WebSocket Server"
+    },
+    {
+      "url": "http://localhost:8010",
+      "description": "Mars WebSocket Server"
+    }
+  ],
+  "paths": {
+    "/send": {
+      "post": {
+        "summary": "Отправка сообщения",
+        "description": "Разбивает сообщение на сегменты и отправляет каждый через HTTP на нижний уровень",
+        "tags": [
+          "Transport"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Сообщение сегментировано и отправлено"
+          }
+        }
+      }
+    },
+    "/transfer": {
+      "post": {
+        "summary": "Получение сегмента",
+        "description": "Получает сегмент и помещает его в Kafka очередь",
+        "tags": [
+          "Transport"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Segment"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Сегмент отправлен в Kafka"
+          }
+        }
+      }
+    },
+    "/receive": {
+      "post": {
+        "summary": "Сборка и передача сообщения",
+        "description": "Получает собранное сообщение и передаёт на прикладной уровень (например, Марс)",
+        "tags": [
+          "Transport"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceivedMessage"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Сообщение получено и передано"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SendRequest": {
+        "type": "object",
+        "required": [
+          "username",
+          "data",
+          "sendTime"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "Elon Musk"
+          },
+          "data": {
+            "type": "string",
+            "example": "Привет, Марс!"
+          },
+          "sendTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T12:45:00Z"
+          }
+        }
+      },
+      "Segment": {
+        "type": "object",
+        "required": [
+          "segmentNumber",
+          "totalSegments",
+          "username",
+          "payload",
+          "sendTime"
+        ],
+        "properties": {
+          "segmentNumber": {
+            "type": "integer",
+            "example": 1
+          },
+          "totalSegments": {
+            "type": "integer",
+            "example": 3
+          },
+          "username": {
+            "type": "string",
+            "example": "Elon Musk"
+          },
+          "payload": {
+            "type": "string",
+            "example": "Прив"
+          },
+          "sendTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T12:45:00Z"
+          }
+        }
+      },
+      "ReceivedMessage": {
+        "type": "object",
+        "required": [
+          "username",
+          "data",
+          "sendTime"
+        ],
+        "properties": {
+          "username": {
+            "type": "string",
+            "example": "Elon Musk"
+          },
+          "data": {
+            "type": "string",
+            "example": "Привет, Марс!"
+          },
+          "sendTime": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2025-03-30T12:45:00Z"
+          }
+        }
+      }
+    }
+  }
+}
